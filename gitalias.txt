@@ -1006,6 +1006,122 @@
     tail +2; \
   }; f"
 
+  # Treat git log as a book, exec git next or git prev to checkout the next or the previous commit.
+  # by using ordering keywords ("first", "last", "prev" or "next"):
+  #
+  #   * `first`: checkout a branch's first commit
+  #
+  #   * `last`: checkout a branch's last commit
+  #
+  #   * `prev`: checkout a branch's previous commit
+  #
+  #   * `next`: checkout a branch's next commit
+  #
+  # Inspirations:
+  #
+  #   * Email from Demian proposing these aliases
+  #
+  #   * https://github.com/hutusi/git-paging
+  #
+
+  # first
+  #
+  # Checkout a branch's first commit.
+  #
+  # Syntax:
+  #
+  #    git first [branch name]
+  #
+  # Options:
+  #
+  #   * branch name: default is the current branch name.
+  #
+  # Example: checkout the current branch's first commit:
+  #
+  #     git first
+  #
+  # Example: checkout the "foo" branch's first commit:
+  #
+  #     git first foo
+  #
+  first = "!f() { \
+      branch=\"${1:-$(git symbolic-ref refs/remotes/origin/HEAD)}\"; \
+      git log --reverse --pretty=%H \"$branch\" | head -1 | xargs git checkout; \
+  }; f"
+
+  # last
+  #
+  # checkout a branch's last commit.
+  #
+  # Syntax:
+  #
+  #    git last [branch name]
+  #
+  # Options:
+  #
+  #   * branch name: default is the current branch name.
+  #
+  # Example: checkout the current branch's last commit:
+  #
+  #     git last
+  #
+  # Example: checkout the "foo" branch's last commit:
+  #
+  #     git last foo
+  #
+  last = "!f() { \
+      branch=\"${1:-$(git symbolic-ref refs/remotes/origin/HEAD)}\"; \
+      git log --pretty=%H \"$branch\" | head -1 | xargs git checkout; \
+  }; f"
+
+  # prev
+  #
+  # Checkout a branch's previous commit.
+  #
+  # Syntax:
+  #
+  #    git prev [branch name]
+  #
+  # Options:
+  #
+  #   * branch name: default is the current branch name.
+  #
+  prev = "!f() { \
+      branch=\"${1:-$(git symbolic-ref refs/remotes/origin/HEAD)}\"; \
+      if [ -z \"$1\" ]; then \
+          n=1; \
+      else \
+          n=\"$1\"; \
+      fi; \
+      git checkout HEAD~$n; \
+  }; f"
+
+  # next
+  #
+  # Checkout a branch's next commit.
+  #
+  # Syntax:
+  #
+  #    git next [branch name]
+  #
+  # Options:
+  #
+  #   * branch name: default is the current branch name.
+  #
+  # Example: checkout the current branch's next commit:
+  #
+  #     git next
+  #
+  next = "!f() { \
+      branch=\"${1:-$(git symbolic-ref refs/remotes/origin/HEAD)}\"; \
+      if [ -z \"$1\" ]; then \
+          n=1; \
+      else \
+          n=$1; \
+      fi; \
+      git log --reverse --pretty=%H \"$branch\" | grep -A \"$n\" \"$(git rev-parse HEAD)\" | tail -1 | xargs git checkout; \
+  }; f"
+
   ### Ref aliases ###
 
   # Sort by date for branches; can be useful for spring cleaning
